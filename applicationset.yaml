@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: guestbook2
+  namespace: openshift-gitops
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: engineering-prod
+            url: https://kubernetes.default.svc
+  template:
+    metadata:
+      name: '{{cluster}}-guestbook2'
+    spec:
+      destination:
+        namespace: guestbook2
+        server: '{{url}}'
+      project: default
+      source:
+        path: 'applicationset/examples/list-generator/guestbook/{{cluster}}'
+        repoURL: 'https://github.com/argoproj/argo-cd.git'
+      syncPolicy: 
+        managedNamespaceMetadata:
+          labels:
+            argocd.argoproj.io/managed-by: openshift-gitops
+        syncOptions:
+          - CreateNamespace=true
